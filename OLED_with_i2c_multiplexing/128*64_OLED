@@ -1,0 +1,64 @@
+
+import tca9548a_test
+import rotary
+from machine import Pin, I2C
+from sh1106 import SH1106_I2C
+import time
+import framebuf
+import writer
+import freesans20
+
+def bigger_text(x,h_pos,v_pos):        
+    if(type(x)==str):
+        font_writer = writer.Writer(oled, freesans20)
+        font_writer.set_textpos(h_pos,v_pos)
+        font_writer.printstring(x)
+    else:
+        font_writer = writer.Writer(oled, newfont)
+        font_writer.set_textpos(h_pos,v_pos)
+        font_writer.printstring(str(x))
+    oled.show()
+    
+def pH_disp():
+    oled.fill(0)
+    oled.show()
+    oled.text("pH:",10,12)
+    a=7.3
+    bigger_text(a,50,5)
+    oled.text("temp:",10,40)
+    oled.show()
+    a=27.0
+    bigger_text(str(a),50,30)
+    time.sleep(1)
+    
+def EC_disp():
+    oled.fill(0)
+    oled.show()
+    oled.text("EC:",10,12)
+    a=127.0
+    bigger_text(a,44,5)
+    oled.text("temp:",10,40)
+    oled.show()
+    a=27.0
+    bigger_text(str(a),50,40)
+    time.sleep(1)
+scl_pin = 17
+sda_pin = 16
+i2c1=I2C(0,sda=Pin(sda_pin), scl=Pin(scl_pin), freq=400000)
+i2c2=I2C(0,sda=Pin(sda_pin), scl=Pin(scl_pin), freq=400000)
+i2c3=I2C(0,sda=Pin(sda_pin), scl=Pin(scl_pin), freq=400000)
+tca = tca9548a_test.TCA9548A(0x70, scl_pin, sda_pin)
+tca.switch_channel(0)
+oled = SH1106_I2C(128, 64, i2c1)
+oled.rotate(True)
+pH_disp()
+tca.switch_channel(1)
+oled = SH1106_I2C(128, 64, i2c2)
+oled.rotate(True)
+EC_disp()
+
+tca.switch_channel(2)
+oled = SH1106_I2C(128, 64, i2c3)
+oled.rotate(True)
+oled.fill(0)
+rotary.fun(oled)
